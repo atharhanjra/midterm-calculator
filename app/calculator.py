@@ -16,6 +16,7 @@ from app.calculator_memento import CalculatorMemento
 from app.exceptions import OperationError, ValidationError
 from app.history import HistoryObserver
 from app.input_validators import InputValidator
+from app.logger import Logger
 from app.operations import Operation
 
 # Type aliases for better readability
@@ -163,7 +164,7 @@ class Calculator:
             operation (Operation): The operation strategy to be set.
         """
         self.operation_strategy = operation
-        logging.info(f"Set operation: {operation}")
+        Logger.info(f"Set operation: {operation}")
 
     def perform_operation(
         self,
@@ -225,11 +226,11 @@ class Calculator:
 
         except ValidationError as e:
             # Log and re-raise validation errors
-            logging.error(f"Validation error: {str(e)}")
+            Logger.error(f"Validation error: {str(e)}")
             raise
         except Exception as e:
             # Log and raise operation errors for any other exceptions
-            logging.error(f"Operation failed: {str(e)}")
+            Logger.error(f"Operation failed: {str(e)}")
             raise OperationError(f"Operation failed: {str(e)}")
 
     def save_history(self) -> None:
