@@ -12,6 +12,7 @@ from app.calculator_config import CalculatorConfig
 from app.exceptions import OperationError, ValidationError
 from app.history import LoggingObserver, AutoSaveObserver
 from app.operations import OperationFactory
+from colorama import Fore, Style
 
 # Fixture to initialize Calculator with a temporary directory for file paths
 @pytest.fixture
@@ -178,7 +179,7 @@ def test_calculator_repl_help(mock_print, mock_input):
 @patch('builtins.print')
 def test_calculator_repl_addition(mock_print, mock_input):
     calculator_repl()
-    mock_print.assert_any_call("\nResult: 5")
+    mock_print.assert_any_call(Fore.GREEN + "\nResult: 5" + Style.RESET_ALL)
 
 def make_calculator(tmp_path):
     """Create a calculator that keeps its files in a temporary test folder."""

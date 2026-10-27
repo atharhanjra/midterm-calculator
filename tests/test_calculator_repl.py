@@ -10,6 +10,7 @@ import pytest
 from app.calculator import Calculator
 from app.calculator_repl import calculator_repl
 from app.exceptions import OperationError
+from colorama import Fore
 
 
 def run_repl(monkeypatch, inputs):
@@ -117,3 +118,14 @@ def test_fatal_error(monkeypatch, capsys):
     with pytest.raises(RuntimeError):
         calculator_repl()
     assert "Fatal error: boom" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("inputs, expected", [
+    (["add", "2", "3", "exit"], Fore.GREEN + "\nResult: 5"),
+    (["add", "abc", "3", "exit"], Fore.RED + "Error:"),
+    (["hello", "exit"], Fore.YELLOW + "Unknown command"),
+])
+def test_colored_output(monkeypatch, capsys, inputs, expected):
+    """Results are green, errors are red, and unknown commands are yellow."""
+    run_repl(monkeypatch, inputs)
+    assert expected in capsys.readouterr().out

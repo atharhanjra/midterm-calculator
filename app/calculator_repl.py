@@ -4,6 +4,7 @@
 
 from decimal import Decimal
 import logging
+from colorama import Fore, Style
 
 from app.calculator import Calculator
 from app.exceptions import OperationError, ValidationError
@@ -53,7 +54,7 @@ def calculator_repl():
                         calc.save_history()
                         print("History saved successfully.")
                     except OperationError as e:
-                        print(f"Warning: Could not save history: {e}")
+                        print(Fore.YELLOW + f"Warning: Could not save history: {e}" + Style.RESET_ALL)
                     print("Goodbye!")
                     break
 
@@ -96,7 +97,7 @@ def calculator_repl():
                         calc.save_history()
                         print("History saved successfully")
                     except OperationError as e:
-                        print(f"Error saving history: {e}")
+                        print(Fore.RED + f"Error saving history: {e}" + Style.RESET_ALL)
                     continue
 
                 if command == 'load':
@@ -105,7 +106,7 @@ def calculator_repl():
                         calc.load_history()
                         print("History loaded successfully")
                     except OperationError as e:
-                        print(f"Error loading history: {e}")
+                        print(Fore.RED + f"Error loading history: {e}" + Style.RESET_ALL)
                     continue
 
                 if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root',
@@ -133,14 +134,14 @@ def calculator_repl():
                         if isinstance(result, Decimal):
                             result = result.normalize()
 
-                        print(f"\nResult: {result:f}")
+                        print(Fore.GREEN + f"\nResult: {result:f}" + Style.RESET_ALL)
                     except (ValidationError, OperationError) as e:
                         # Handle known exceptions related to validation or operation errors
-                        print(f"Error: {e}")
+                        print(Fore.RED + f"Error: {e}" + Style.RESET_ALL)
                     continue
 
                 # Handle unknown commands
-                print(f"Unknown command: '{command}'. Type 'help' for available commands.")
+                print(Fore.YELLOW + f"Unknown command: '{command}'. Type 'help' for available commands." + Style.RESET_ALL)
 
             except KeyboardInterrupt:
                 # Handle Ctrl+C interruption gracefully
