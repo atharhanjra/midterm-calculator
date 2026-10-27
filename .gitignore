@@ -83,4 +83,7 @@ dmypy.json
 .ipynb_checkpoints
 
 # Local development configuration
-local_settings.py
+local_settings.pyhistory/
+logs/
+test_history/
+test_logs/
