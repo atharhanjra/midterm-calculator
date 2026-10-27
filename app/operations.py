@@ -248,6 +248,95 @@ class Root(Operation):
         self.validate_operands(a, b)
         return Decimal(pow(float(a), 1 / float(b)))
 
+class Modulus(Division):
+    """
+    Modulus operation implementation.
+
+    Computes the remainder after dividing one number by another.
+    Inherits the division-by-zero check from Division.
+    """
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the remainder of a divided by b.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Returns:
+            Decimal: Remainder of the division.
+        """
+        self.validate_operands(a, b)
+        return a % b
+
+
+class IntegerDivision(Division):
+    """
+    Integer division operation implementation.
+
+    Divides one number by another and discards the fractional part.
+    Inherits the division-by-zero check from Division.
+    """
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Divide a by b and keep only the whole-number part.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Returns:
+            Decimal: Integer quotient.
+        """
+        self.validate_operands(a, b)
+        return a // b
+
+
+class Percentage(Division):
+    """
+    Percentage operation implementation.
+
+    Calculates what percentage a is of b: (a / b) * 100.
+    Inherits the division-by-zero check from Division.
+    """
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate a as a percentage of b.
+
+        Args:
+            a (Decimal): The part.
+            b (Decimal): The whole.
+
+        Returns:
+            Decimal: The percentage.
+        """
+        self.validate_operands(a, b)
+        return (a / b) * 100
+
+
+class AbsoluteDifference(Operation):
+    """
+    Absolute difference operation implementation.
+
+    Calculates the distance between two numbers, always as a positive value.
+    """
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the absolute difference between two numbers.
+
+        Args:
+            a (Decimal): First operand.
+            b (Decimal): Second operand.
+
+        Returns:
+            Decimal: The absolute difference.
+        """
+        self.validate_operands(a, b)
+        return abs(a - b)
 
 class OperationFactory:
     """
@@ -265,7 +354,11 @@ class OperationFactory:
         'multiply': Multiplication,
         'divide': Division,
         'power': Power,
-        'root': Root
+        'root': Root,
+        'modulus': Modulus,
+        'int_divide': IntegerDivision,
+        'percent': Percentage,
+        'abs_diff': AbsoluteDifference
     }
 
     @classmethod

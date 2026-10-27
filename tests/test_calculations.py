@@ -160,3 +160,14 @@ def test_calculation_failed():
     """A result too big to compute raises an OperationError."""
     with pytest.raises(OperationError, match="Calculation failed"):
         Calculation(operation="Power", operand1=Decimal("10"), operand2=Decimal("1000"))
+
+@pytest.mark.parametrize("operation, a, b, expected", [
+    ("Modulus", "10", "3", "1"),
+    ("IntegerDivision", "7", "2", "3"),
+    ("Percentage", "50", "200", "25"),
+    ("AbsoluteDifference", "3", "10", "7"),
+])
+def test_new_operations_in_calculation(operation, a, b, expected):
+    """Calculation computes the right result for each new operation."""
+    calc = Calculation(operation=operation, operand1=Decimal(a), operand2=Decimal(b))
+    assert calc.result == Decimal(expected)

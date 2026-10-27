@@ -11,6 +11,10 @@ from app.operations import (
     Division,
     Power,
     Root,
+    Modulus,
+    IntegerDivision,
+    Percentage,
+    AbsoluteDifference,
     OperationFactory,
 )
 
@@ -225,3 +229,37 @@ class TestOperationFactory:
 
         with pytest.raises(TypeError, match="Operation class must inherit"):
             OperationFactory.register_operation("invalid", InvalidOperation)
+
+@pytest.mark.parametrize("operation_class, a, b, expected", [
+    (Modulus, "10", "3", "1"),
+    (Modulus, "9", "3", "0"),
+    (IntegerDivision, "7", "2", "3"),
+    (IntegerDivision, "10", "5", "2"),
+    (Percentage, "50", "200", "25"),
+    (Percentage, "50", "100", "50"),
+    (AbsoluteDifference, "3", "10", "7"),
+    (AbsoluteDifference, "10", "3", "7"),
+    (AbsoluteDifference, "-5", "5", "10"),
+])
+def test_new_operations(operation_class, a, b, expected):
+    """Each new operation returns the correct result."""
+    result = operation_class().execute(Decimal(a), Decimal(b))
+    assert result == Decimal(expected)
+
+
+@pytest.mark.parametrize("operation_class", [Modulus, IntegerDivision, Percentage])
+def test_new_operations_divide_by_zero(operation_class):
+    """Operations that divide raise an error when the second number is zero."""
+    with pytest.raises(ValidationError, match="Division by zero is not allowed"):
+        operation_class().execute(Decimal("5"), Decimal("0"))
+
+
+@pytest.mark.parametrize("name, expected_class", [
+    ("modulus", Modulus),
+    ("int_divide", IntegerDivision),
+    ("percent", Percentage),
+    ("abs_diff", AbsoluteDifference),
+])
+def test_factory_creates_new_operations(name, expected_class):
+    """The factory creates the right class for each new command."""
+    assert isinstance(OperationFactory.create_operation(name), expected_class)
