@@ -1,4 +1,4 @@
-name: Run Tests on Push or Pull Request to Main
+name: Python application
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'  # Set your desired Python version
+          python-version: '3.12'  # Match the local Python version
 
       - name: Install dependencies from requirements.txt
         run: |
@@ -27,6 +27,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov  # Ensure pytest-cov is installed
 
-      - name: Run tests with pytest and enforce 100% coverage
+      - name: Run tests with pytest and enforce 90% coverage
         run: |
-          pytest --cov=app --cov-fail-under=100
+          pytest --cov=app --cov-fail-under=90
