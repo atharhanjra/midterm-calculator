@@ -8,7 +8,11 @@ from decimal import Decimal, InvalidOperation
 import logging
 from typing import Any, Dict
 
-from app.exceptions import OperationError
+from app.exceptions import OperationError, ValidationError
+from app.operations import (
+    Addition, Subtraction, Multiplication, Division, Power, Root,
+    Modulus, IntegerDivision, Percentage, AbsoluteDifference
+)
 
 
 @dataclass
@@ -44,9 +48,8 @@ class Calculation:
         """
         Execute calculation using the specified operation.
 
-        Utilizes a dictionary to map operation names to their corresponding
-        lambda functions, enabling dynamic execution of operations based on
-        the operation name.
+        Uses the same operation classes as the Calculator (from operations.py),
+        so the result stored in history always matches the result shown to the user.
 
         Returns:
             Decimal: The result of the calculation.
@@ -54,71 +57,34 @@ class Calculation:
         Raises:
             OperationError: If the operation is unknown or the calculation fails.
         """
-        # Mapping of operation names to their corresponding functions
+        # Mapping of operation names to the operation classes that do the math
         operations = {
-            "Addition": lambda x, y: x + y,
-            "Subtraction": lambda x, y: x - y,
-            "Multiplication": lambda x, y: x * y,
-            "Division": lambda x, y: x / y if y != 0 else self._raise_div_zero(),
-            "Power": lambda x, y: Decimal(pow(float(x), float(y))) if y >= 0 else self._raise_neg_power(),
-            "Root": lambda x, y: (
-                Decimal(pow(float(x), 1 / float(y))) 
-                if x >= 0 and y != 0 
-                else self._raise_invalid_root(x, y)
-            ),
-            "Modulus": lambda x, y: x % y,
-            "IntegerDivision": lambda x, y: x // y,
-            "Percentage": lambda x, y: (x / y) * 100,
-            "AbsoluteDifference": lambda x, y: abs(x - y),
+            "Addition": Addition,
+            "Subtraction": Subtraction,
+            "Multiplication": Multiplication,
+            "Division": Division,
+            "Power": Power,
+            "Root": Root,
+            "Modulus": Modulus,
+            "IntegerDivision": IntegerDivision,
+            "Percentage": Percentage,
+            "AbsoluteDifference": AbsoluteDifference,
         }
 
-        # Retrieve the operation function based on the operation name
-        op = operations.get(self.operation)
-        if not op:
+        # Retrieve the operation class based on the operation name
+        operation_class = operations.get(self.operation)
+        if not operation_class:
             raise OperationError(f"Unknown operation: {self.operation}")
 
         try:
             # Execute the operation with the provided operands
-            return op(self.operand1, self.operand2)
+            return operation_class().execute(self.operand1, self.operand2)
+        except ValidationError as e:
+            # Invalid operands, such as dividing by zero
+            raise OperationError(str(e))
         except (InvalidOperation, ValueError, ArithmeticError) as e:
-            # Handle any errors that occur during calculation
+            # Handle any other errors that occur during calculation
             raise OperationError(f"Calculation failed: {str(e)}")
-
-    @staticmethod
-    def _raise_div_zero():  # pragma: no cover
-        """
-        Helper method to raise division by zero error.
-
-        This method is called when a division by zero is attempted.
-        """
-        raise OperationError("Division by zero is not allowed")
-
-    @staticmethod
-    def _raise_neg_power():  # pragma: no cover
-        """
-        Helper method to raise negative power error.
-
-        This method is called when a negative exponent is used in a power operation.
-        """
-        raise OperationError("Negative exponents are not supported")
-
-    @staticmethod
-    def _raise_invalid_root(x: Decimal, y: Decimal):  # pragma: no cover
-        """
-        Helper method to raise invalid root error.
-
-        This method is called when an invalid root operation is attempted, such as
-        taking the root of a negative number or using zero as the root degree.
-
-        Args:
-            x (Decimal): The number from which the root is taken.
-            y (Decimal): The degree of the root.
-        """
-        if y == 0:
-            raise OperationError("Zero root is undefined")
-        if x < 0:
-            raise OperationError("Cannot calculate root of negative number")
-        raise OperationError("Invalid root operation")
 
     def to_dict(self) -> Dict[str, Any]:
         """

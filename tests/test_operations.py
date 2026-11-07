@@ -149,13 +149,14 @@ class TestPower(BaseOperationTest):
         "one_exponent": {"a": "5", "b": "1", "expected": "5"},
         "decimal_base": {"a": "2.5", "b": "2", "expected": "6.25"},
         "zero_base": {"a": "0", "b": "5", "expected": "0"},
+        "negative_exponent": {"a": "2", "b": "-2", "expected": "0.25"},
     }
     invalid_test_cases = {
-        "negative_exponent": {
-            "a": "2",
-            "b": "-3",
+        "zero_base_negative_exponent": {
+            "a": "0",
+            "b": "-2",
             "error": ValidationError,
-            "message": "Negative exponents not supported"
+            "message": "Cannot raise zero to a negative power"
         },
     }
 

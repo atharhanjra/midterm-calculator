@@ -37,8 +37,15 @@ def test_power():
 
 
 def test_negative_power():
-    with pytest.raises(OperationError, match="Negative exponents are not supported"):
-        Calculation(operation="Power", operand1=Decimal("2"), operand2=Decimal("-3"))
+    """A negative exponent works: 2 ** -2 = 0.25."""
+    calc = Calculation(operation="Power", operand1=Decimal("2"), operand2=Decimal("-2"))
+    assert calc.result == Decimal("0.25")
+
+
+def test_zero_to_negative_power():
+    """Zero cannot be raised to a negative power."""
+    with pytest.raises(OperationError, match="Cannot raise zero to a negative power"):
+        Calculation(operation="Power", operand1=Decimal("0"), operand2=Decimal("-2"))
 
 
 def test_root():

@@ -197,7 +197,7 @@ class Calculator:
             validated_b = InputValidator.validate_number(b, self.config)
 
             # Execute the operation strategy
-            result = self.operation_strategy.execute(validated_a, validated_b)
+            self.operation_strategy.execute(validated_a, validated_b)
 
             # Create a new Calculation instance with the operation details
             calculation = Calculation(
@@ -222,7 +222,7 @@ class Calculator:
             # Notify all observers about the new calculation
             self.notify_observers(calculation)
 
-            return result
+            return calculation.result
 
         except ValidationError as e:
             # Log and re-raise validation errors
