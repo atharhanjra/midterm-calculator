@@ -275,3 +275,21 @@ def test_format_result_large_number(tmp_path):
     """A number too large to round is shown in full instead of crashing."""
     calc = Calculator(CalculatorConfig(base_dir=tmp_path))
     assert calc.format_result(Decimal("1e30")) == "1" + "0" * 30
+
+
+def test_history_uses_encoding_setting(tmp_path):
+    """The history file is saved and loaded with the configured encoding."""
+    calc = Calculator(CalculatorConfig(base_dir=tmp_path, default_encoding="utf-16"))
+    calc.set_operation(OperationFactory.create_operation("add"))
+    calc.perform_operation("2", "3")
+    calc.save_history()
+
+    history_file = calc.config.history_file
+    # The file is written in UTF-16, so it can't be read as UTF-8
+    assert "Addition" in history_file.read_text(encoding="utf-16")
+    with pytest.raises(UnicodeDecodeError):
+        history_file.read_text(encoding="utf-8")
+
+    # A new calculator with the same setting loads it back correctly
+    reloaded = Calculator(CalculatorConfig(base_dir=tmp_path, default_encoding="utf-16"))
+    assert len(reloaded.history) == 1
