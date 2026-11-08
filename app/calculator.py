@@ -327,6 +327,7 @@ class Calculator:
                         })
                         for _, row in df.iterrows()
                     ]
+                    self.history = self.history[-self.config.max_history_size:]
                     logging.info(f"Loaded {len(self.history)} calculations from history")
                 else:
                     logging.info("Loaded empty history file")

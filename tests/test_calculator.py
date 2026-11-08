@@ -293,3 +293,16 @@ def test_history_uses_encoding_setting(tmp_path):
     # A new calculator with the same setting loads it back correctly
     reloaded = Calculator(CalculatorConfig(base_dir=tmp_path, default_encoding="utf-16"))
     assert len(reloaded.history) == 1
+
+
+def test_load_keeps_only_newest_entries(tmp_path):
+    """Loading a file with too many entries keeps only the newest ones."""
+    calc = Calculator(CalculatorConfig(base_dir=tmp_path))
+    calc.set_operation(OperationFactory.create_operation("add"))
+    for number in ["1", "2", "3"]:
+        calc.perform_operation(number, number)
+    calc.save_history()
+
+    # Load the same file with room for only 2 entries
+    small = Calculator(CalculatorConfig(base_dir=tmp_path, max_history_size=2))
+    assert [c.result for c in small.history] == [Decimal("4"), Decimal("6")]
