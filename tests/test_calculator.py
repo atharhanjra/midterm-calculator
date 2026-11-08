@@ -259,3 +259,19 @@ def test_get_history_dataframe(tmp_path):
     assert len(df) == 1
     assert df.iloc[0]["operation"] == "Addition"
     assert df.iloc[0]["result"] == "5"
+
+
+@pytest.mark.parametrize("precision, expected", [
+    (2, "0.33"),
+    (4, "0.3333"),
+])
+def test_format_result_uses_precision(tmp_path, precision, expected):
+    """The displayed result is rounded to the precision setting."""
+    calc = Calculator(CalculatorConfig(base_dir=tmp_path, precision=precision))
+    assert calc.format_result(Decimal("1") / Decimal("3")) == expected
+
+
+def test_format_result_large_number(tmp_path):
+    """A number too large to round is shown in full instead of crashing."""
+    calc = Calculator(CalculatorConfig(base_dir=tmp_path))
+    assert calc.format_result(Decimal("1e30")) == "1" + "0" * 30

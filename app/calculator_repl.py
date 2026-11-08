@@ -130,11 +130,8 @@ def calculator_repl():
                         # Perform the calculation
                         result = calc.perform_operation(a, b)
 
-                        # Normalize the result if it's a Decimal
-                        if isinstance(result, Decimal):
-                            result = result.normalize()
-
-                        print(Fore.GREEN + f"\nResult: {result:f}" + Style.RESET_ALL)
+                        # Show the result rounded to the configured precision
+                        print(Fore.GREEN + f"\nResult: {calc.format_result(result)}" + Style.RESET_ALL)
                     except (ValidationError, OperationError) as e:
                         # Handle known exceptions related to validation or operation errors
                         print(Fore.RED + f"Error: {e}" + Style.RESET_ALL)

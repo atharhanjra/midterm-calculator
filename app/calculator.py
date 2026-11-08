@@ -2,7 +2,7 @@
 # Calculator Class      #
 ########################
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import logging
 import os
 from pathlib import Path
@@ -233,6 +233,27 @@ class Calculator:
             Logger.error(f"Operation failed: {str(e)}")
             raise OperationError(f"Operation failed: {str(e)}")
 
+    def format_result(self, result: Decimal) -> str:
+        """
+        Format a result for display using the configured precision.
+
+        Rounds the result to CALCULATOR_PRECISION decimal places and removes
+        trailing zeros. For example, 0.3333333333 becomes 0.33 when the
+        precision is 2.
+
+        Args:
+            result (Decimal): The result to format.
+
+        Returns:
+            str: The rounded result as plain text.
+        """
+        try:
+            rounded = result.quantize(Decimal(1).scaleb(-self.config.precision))
+            return f"{rounded.normalize():f}"
+        except InvalidOperation:
+            # The number is too large to round to this many decimal places
+            return f"{result.normalize():f}"
+    
     def save_history(self) -> None:
         """
         Save calculation history to a CSV file using pandas.
