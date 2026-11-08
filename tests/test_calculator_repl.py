@@ -10,7 +10,8 @@ import pytest
 from app.calculator import Calculator
 from app.calculator_repl import calculator_repl
 from app.exceptions import OperationError
-from colorama import Fore
+from colorama import Fore, Style
+from app.operations import OperationFactory
 
 
 def run_repl(monkeypatch, inputs):
@@ -129,3 +130,50 @@ def test_colored_output(monkeypatch, capsys, inputs, expected):
     """Results are green, errors are red, and unknown commands are yellow."""
     run_repl(monkeypatch, inputs)
     assert expected in capsys.readouterr().out
+
+
+def use_temp_folders(monkeypatch, tmp_path):
+    """Keep the REPL's history and log files in a temporary test folder."""
+    monkeypatch.setenv("CALCULATOR_HISTORY_DIR", str(tmp_path / "history"))
+    monkeypatch.setenv("CALCULATOR_LOG_DIR", str(tmp_path / "logs"))
+
+
+@pytest.mark.parametrize("precision, expected", [
+    ("2", "0.33"),
+    ("4", "0.3333"),
+])
+def test_repl_precision_setting(monkeypatch, capsys, tmp_path, precision, expected):
+    """Changing CALCULATOR_PRECISION changes the result shown in the REPL."""
+    use_temp_folders(monkeypatch, tmp_path)
+    monkeypatch.setenv("CALCULATOR_PRECISION", precision)
+    run_repl(monkeypatch, ["divide", "1", "3", "exit"])
+    assert f"Result: {expected}" + Style.RESET_ALL in capsys.readouterr().out
+
+
+def test_repl_negative_power_in_history(monkeypatch, capsys, tmp_path):
+    """2 ** -2 shows 0.25 as the result and in the history."""
+    use_temp_folders(monkeypatch, tmp_path)
+    run_repl(monkeypatch, ["power", "2", "-2", "history", "exit"])
+    output = capsys.readouterr().out
+    assert "Result: 0.25" in output
+    assert "Power(2, -2) = 0.25" in output
+
+
+def test_repl_load_respects_history_limit(monkeypatch, capsys, tmp_path):
+    """Loading a history file in the REPL keeps only the newest entries."""
+    use_temp_folders(monkeypatch, tmp_path)
+
+    # Save 3 calculations to the history file
+    calc = Calculator()
+    calc.set_operation(OperationFactory.create_operation("add"))
+    for number in ["1", "2", "3"]:
+        calc.perform_operation(number, number)
+    calc.save_history()
+
+    # Allow only 2 entries, then load the file in the REPL
+    monkeypatch.setenv("CALCULATOR_MAX_HISTORY_SIZE", "2")
+    run_repl(monkeypatch, ["load", "history", "exit"])
+    output = capsys.readouterr().out
+    assert "Addition(2, 2) = 4" in output
+    assert "Addition(3, 3) = 6" in output
+    assert "Addition(1, 1) = 2" not in output
